@@ -7,4 +7,4 @@ if st.button('인사말 생성'):
   st.info(a+'님! 안녕하세요!')
   st.warning(b+'저도 좋아해요')
   st.error('우리 잘 지내봐요!')
-  st.ballons()
+  st.balloons()
