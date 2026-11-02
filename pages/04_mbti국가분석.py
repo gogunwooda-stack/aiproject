@@ -100,10 +100,10 @@ def load_data():
     current_dir = Path(__file__).resolve().parent
 
     candidates = [
-        current_dir.parent / "countriesMBTI_16types(1).csv",
+        current_dir.parent / "countriesMBTI_16types.csv",
         current_dir / "countriesMBTI_16types(1).csv",
         current_dir.parent / "data" / "countriesMBTI_16types(1).csv",
-        Path.cwd() / "countriesMBTI_16types(1).csv",
+        Path.cwd() / "countriesMBTI_16types.csv",
     ]
 
     csv_path = next(
