@@ -29,7 +29,7 @@ plt.rcParams["axes.unicode_minus"] = False
 # =====================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-CSV_PATH = BASE_DIR / "temperature(2).csv"
+CSV_PATH = BASE_DIR / "temperature.csv"
 
 # =====================================
 # 4. CSV 파일 불러오기
