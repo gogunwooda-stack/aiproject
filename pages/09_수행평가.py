@@ -1,6 +1,7 @@
 
-
 import streamlit as st
+import pandas as pd
+from pathlib import Path
 
 # ==========================================
 # 🍳 기본 설정
@@ -54,6 +55,68 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==========================================
+# 📂 식재료 정보 CSV 불러오기
+# ==========================================
+@st.cache_data
+def load_ingredient_info():
+
+    possible_paths = [
+        Path(__file__).resolve().parent.parent / "ingredient_info.csv",
+        Path.cwd() / "ingredient_info.csv",
+    ]
+
+    for csv_file in possible_paths:
+        if csv_file.exists():
+
+            try:
+                data = pd.read_csv(
+                    csv_file,
+                    encoding="utf-8-sig"
+                )
+            except UnicodeDecodeError:
+                data = pd.read_csv(
+                    csv_file,
+                    encoding="cp949"
+                )
+
+            required_columns = [
+                "식재료명",
+                "식재료 분류",
+                "주요 특징",
+                "손질 방법",
+                "보관 방법",
+                "제철",
+                "주요 조리법"
+            ]
+
+            missing = [
+                col for col in required_columns
+                if col not in data.columns
+            ]
+
+            if missing:
+                st.error(
+                    "CSV 열 이름이 올바르지 않아: "
+                    + ", ".join(missing)
+                )
+                return pd.DataFrame(
+                    columns=required_columns
+                )
+
+            return data
+
+    st.warning(
+        "ingredient_info.csv 파일을 찾지 못했어. "
+        "CSV 파일을 프로젝트 최상위 폴더에 넣어줘."
+    )
+
+    return pd.DataFrame()
+
+
+ingredient_info_df = load_ingredient_info()
+
+
+# ==========================================
 # 🥕 식재료 데이터
 # ==========================================
 ingredient_options = [
@@ -68,6 +131,7 @@ ingredient_options = [
     "쌀", "밥", "파스타면", "우동면",
     "치즈", "생크림", "우유", "버터"
 ]
+
 
 # ==========================================
 # 🍽️ 메인 요리 데이터
@@ -105,6 +169,7 @@ recipes = [
         "tip": "닭가슴살을 너무 오래 가열하면 퍽퍽해질 수 있어. 중심부까지 충분히 익히되 과하게 익히지 않는 것이 중요해.",
         "plating": "접시 중앙에 닭고기를 놓고 크림소스를 주변에 자연스럽게 펼쳐줘. 볶은 버섯을 위에 올리면 완성도가 높아져."
     },
+
     {
         "name": "🥩 소고기 버섯 간장볶음",
         "category": "한식",
@@ -136,6 +201,7 @@ recipes = [
         "tip": "소고기를 한꺼번에 너무 많이 넣으면 팬 온도가 내려가 수분이 생길 수 있어. 필요하면 나누어 볶아줘.",
         "plating": "밥과 함께 덮밥으로 담거나 접시 중앙에 소고기를 높게 쌓아 담으면 좋아."
     },
+
     {
         "name": "🐷 돼지고기 김치볶음",
         "category": "한식",
@@ -167,6 +233,7 @@ recipes = [
         "tip": "김치를 충분히 볶으면 신맛이 부드러워지고 돼지고기와 잘 어우러져.",
         "plating": "접시 중앙에 김치볶음을 담고 깨나 대파를 올려 색감을 살려줘."
     },
+
     {
         "name": "🍝 새우 토마토 파스타",
         "category": "양식",
@@ -198,6 +265,7 @@ recipes = [
         "tip": "면수의 전분은 소스와 면이 잘 어우러지도록 도와줘. 면수를 조금씩 넣어 농도를 조절해 봐.",
         "plating": "집게로 면을 돌돌 말아 중앙에 담고 새우를 위쪽에 배치하면 좋아."
     },
+
     {
         "name": "🍛 닭고기 채소 카레",
         "category": "퓨전",
@@ -229,6 +297,7 @@ recipes = [
         "tip": "양파를 충분히 볶으면 카레의 풍미와 단맛이 좋아져.",
         "plating": "밥을 둥글게 담고 한쪽에 카레를 부어 색이 대비되도록 해줘."
     },
+
     {
         "name": "🐟 연어 버터구이",
         "category": "양식",
@@ -259,6 +328,7 @@ recipes = [
         "tip": "연어를 굽기 전에 표면의 수분을 잘 제거해야 팬에 달라붙는 것을 줄이고 노릇하게 구울 수 있어.",
         "plating": "연어를 접시 중앙에 놓고 브로콜리와 감자를 주변에 배치해 색감을 살려줘."
     },
+
     {
         "name": "🍳 두부 채소 덮밥",
         "category": "퓨전",
@@ -290,6 +360,7 @@ recipes = [
         "tip": "두부의 물기를 충분히 제거하면 굽는 과정에서 모양이 쉽게 부서지지 않아.",
         "plating": "밥을 그릇에 담고 두부와 채소를 색깔별로 나누어 올리면 보기 좋아."
     },
+
     {
         "name": "🌶️ 매콤 돼지고기 가지볶음",
         "category": "퓨전",
@@ -324,6 +395,7 @@ recipes = [
     }
 ]
 
+
 # ==========================================
 # 🏠 메인 화면
 # ==========================================
@@ -331,6 +403,7 @@ st.markdown(
     '<div class="main-title">👨‍🍳 오늘 뭐 먹지?</div>',
     unsafe_allow_html=True
 )
+
 st.markdown(
     '<div class="sub-title">냉장고 속 재료로 만드는 나만의 메인 요리 추천소 🍽️</div>',
     unsafe_allow_html=True
@@ -364,10 +437,12 @@ top_count = st.radio(
 
 st.divider()
 
+
 # ==========================================
 # 🔍 추천 알고리즘
 # ==========================================
 def calculate_score(recipe, selected_items):
+
     match_items = recipe["match"]
 
     matched = [
@@ -375,12 +450,18 @@ def calculate_score(recipe, selected_items):
         if item in selected_items
     ]
 
-    score = round(len(matched) / len(match_items) * 100)
+    score = round(
+        len(matched) / len(match_items) * 100
+    )
 
     return score, matched
 
 
-if st.button("🍳 내 재료로 요리 추천받기!", type="primary", use_container_width=True):
+if st.button(
+    "🍳 내 재료로 요리 추천받기!",
+    type="primary",
+    use_container_width=True
+):
 
     if len(selected) == 0:
         st.warning("먼저 가지고 있는 식재료를 하나 이상 선택해 줘! 🥕")
@@ -393,7 +474,10 @@ if st.button("🍳 내 재료로 요리 추천받기!", type="primary", use_cont
             if category != "전체" and recipe["category"] != category:
                 continue
 
-            score, matched = calculate_score(recipe, selected)
+            score, matched = calculate_score(
+                recipe,
+                selected
+            )
 
             if score > 0:
                 results.append({
@@ -419,6 +503,7 @@ if st.button("🍳 내 재료로 요리 추천받기!", type="primary", use_cont
         else:
             st.session_state["recommendations"] = results[:top_count]
             st.session_state["selected_items"] = selected
+
 
 # ==========================================
 # 📋 추천 결과 출력
@@ -479,6 +564,7 @@ if "recommendations" in st.session_state:
                 )
 
                 for name, amount, unit in recipe["ingredients"]:
+
                     if name in st.session_state["selected_items"]:
                         st.markdown(
                             f"- 🟢 **{name}** : {amount}{unit} (보유 재료)"
@@ -512,11 +598,121 @@ if "recommendations" in st.session_state:
                 )
 
     st.divider()
+
     st.markdown(
         "### 💡 셰프의 한마디\n"
         "같은 재료라도 손질 방법과 조리 순서에 따라 완전히 다른 요리가 될 수 있어! "
         "추천 레시피를 참고해서 나만의 스타일로 발전시켜 봐. 🔥"
     )
+
+
+# ==========================================
+# 🥕 선택한 식재료의 전문 정보 (CSV + Pandas)
+# ==========================================
+if selected and not ingredient_info_df.empty:
+
+    st.divider()
+
+    st.markdown("## 🔎 선택한 식재료 자세히 알아보기")
+
+    st.write(
+        "ingredient_info.csv의 데이터를 판다스로 검색해 "
+        "식재료의 특징, 손질법, 보관법, 제철과 주요 조리법을 보여줘."
+    )
+
+    # 일반 명칭은 CSV에 있는 구체적인 식재료 예시와 연결
+    related_names = {
+        "소고기": ["소고기 등심"],
+        "버섯": ["표고버섯", "양송이버섯"],
+    }
+
+    matched_info_rows = []
+
+    for selected_name in selected:
+
+        exact = ingredient_info_df[
+            ingredient_info_df["식재료명"].astype(str).str.strip()
+            == selected_name
+        ]
+
+        if not exact.empty:
+
+            for _, row in exact.iterrows():
+                matched_info_rows.append(
+                    (selected_name, row, False)
+                )
+
+        elif selected_name in related_names:
+
+            for related_name in related_names[selected_name]:
+
+                related = ingredient_info_df[
+                    ingredient_info_df["식재료명"].astype(str).str.strip()
+                    == related_name
+                ]
+
+                for _, row in related.iterrows():
+                    matched_info_rows.append(
+                        (selected_name, row, True)
+                    )
+
+    if matched_info_rows:
+
+        for selected_name, row, is_related in matched_info_rows:
+
+            if is_related:
+                st.markdown(
+                    f"### 🥬 {selected_name} 관련 정보: {row['식재료명']}"
+                )
+                st.caption(
+                    "선택한 식재료와 관련된 구체적인 예시 정보야."
+                )
+            else:
+                st.markdown(
+                    f"### 🥬 {row['식재료명']}"
+                )
+
+            col_a, col_b = st.columns(2)
+
+            with col_a:
+                st.markdown(f"**분류:** {row['식재료 분류']}")
+                st.markdown(f"**주요 특징:** {row['주요 특징']}")
+                st.markdown(f"**제철:** {row['제철']}")
+
+            with col_b:
+                st.markdown(f"**손질 방법:** {row['손질 방법']}")
+                st.markdown(f"**보관 방법:** {row['보관 방법']}")
+                st.markdown(f"**주요 조리법:** {row['주요 조리법']}")
+
+            st.divider()
+
+    else:
+        st.info(
+            "선택한 식재료의 상세 정보가 CSV에 아직 없어. "
+            "현재 등록된 식재료를 선택하면 전문 정보를 확인할 수 있어."
+        )
+
+    # 판다스 데이터 분석 결과
+    with st.expander("📊 CSV 데이터 분석 결과 보기"):
+
+        st.metric(
+            "CSV에 등록된 식재료 수",
+            f"{len(ingredient_info_df)}개"
+        )
+
+        category_counts = (
+            ingredient_info_df["식재료 분류"]
+            .value_counts()
+            .rename_axis("식재료 분류")
+            .reset_index(name="개수")
+        )
+
+        st.dataframe(
+            category_counts,
+            use_container_width=True,
+            hide_index=True
+        )
+
 
 # ==========================================
 # 📌 하단 안내
@@ -526,6 +722,7 @@ st.divider()
 st.caption(
     "👨‍🍳 오늘 뭐 먹지? | 식재료 일치도 기반 메인 요리 추천 프로그램"
 )
+
 st.caption(
     "※ 추천 결과는 등록된 레시피를 기준으로 계산돼. "
     "실제 조리 전에는 식재료의 신선도와 알레르기 여부를 확인해 줘."
